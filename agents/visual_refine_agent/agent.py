@@ -4,7 +4,7 @@ import re
 
 
 from .prompt import SYSTEM_PROMPT, USER_PROMPT, ERROR_PROMPT
-from agents.openai_chatComplete import  completion_for_4v
+from agents.openai_chatComplete import  completion_for_4v, completion_for_4v_async
 from agents.utils import fill_in_placeholders
 
 
@@ -43,17 +43,59 @@ class VisualRefineAgent:
         }
 
         messages = []
+        if "llava" in model_type:
+            messages.append({"role": "system", "content": fill_in_placeholders(SYSTEM_PROMPT, information)})
+            messages.append({"role": "user",
+                            "content": [{
+                                        "type": "text",
+                                        "text": fill_in_placeholders(USER_PROMPT, information),
+                                        },
+                                        {
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": f"{base64_image1}"#f"data:image/jpeg;base64,{base64_image1}"
+                                        }
+                                        },
+                                        ]
+                            })
+        else:
+            messages.append({"role": "system", "content": fill_in_placeholders(SYSTEM_PROMPT, information)})
+            messages.append({"role": "user",
+                            "content": [fill_in_placeholders(USER_PROMPT, information),
+                                        {
+                                        "type": "image_url",
+                                        "image_url": {
+                                            "url": f"{base64_image1}"#f"data:image/jpeg;base64,{base64_image1}"
+                                        }
+                                        },
+                                        ]
+                            })
+        visual_feedback = completion_for_4v(messages, model_type)
+
+        return visual_feedback
+
+    async def run_async(self, model_type, query_type, file_name):
+        plot = os.path.join(self.workspace, self.plot_file)
+        base64_image1 = encode_image(f"{plot}")
+
+        information = {
+            'query': self.query,
+            'file_name': file_name,
+            'code': self.code
+        }
+
+        messages = []
         messages.append({"role": "system", "content": fill_in_placeholders(SYSTEM_PROMPT, information)})
         messages.append({"role": "user",
                         "content": [fill_in_placeholders(USER_PROMPT, information),
                                     {
                                     "type": "image_url",
                                     "image_url": {
-                                        "url": f"data:image/jpeg;base64,{base64_image1}"
+                                        "url": f"{base64_image1}"#f"data:image/jpeg;base64,{base64_image1}"
                                     }
                                     },
                                     ]
                         })
-        visual_feedback = completion_for_4v(messages, 'gpt-4-vision-preview')
+        visual_feedback = await completion_for_4v_async(messages, model_type)
 
         return visual_feedback

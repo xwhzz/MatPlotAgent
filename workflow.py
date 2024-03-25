@@ -36,31 +36,6 @@ def mainworkflow(expert_instruction, simple_instruction, workspace, max_try=3):
     logging.info(novice_log)
     logging.info('=========Original Code=========')
     logging.info(novice_code)
-    # Code refinement
-    # code_refine_agent = CodeRefineAgent(expanded_simple_instruction, novice_4_code)
-    # refined_response = code_refine_agent.run()
-    # logging.info('=========Refined Code=========')
-    # logging.info(refined_response)
-
-    # Visual refinement
-    # if True:
-    #     # refined_code = get_code(refined_response)
-    #     # if refined_code == '':
-    #     #    refined_code = refined_response.strip('"""')
-    #     # else:
-    #     #    pass
-    #     refined_code = 'print(json.load())'
-    #     if check_refined_code_executable(refined_code, 'gpt-4', 'novice', config['workspace']):
-    #         print('Use refined code for visual feedback')
-    #         visual_refine_agent = VisualRefineAgent('novice_4.png', config, refined_code, simple_instruction)
-    #         visual_feedback = visual_refine_agent.run('gpt-4', 'novice', 'novice_4_final.png')
-    #         logging.info('=========Visual Feedback=========')
-    #         logging.info(visual_feedback)
-    #         final_instruction = refined_code + '\n\n' + visual_feedback
-    #         action_agent = PlotAgent(config, final_instruction)
-    #         novice_4_log, novice_4_code = action_agent.run_vis('gpt-4', 'novice_4_final.png')
-    #         logging.info(novice_4_log)
-    #     else:
     if args.visual_refine and os.path.exists(f'{workspace}/novice.png'):
         print('Use original code for visual feedback')
         visual_refine_agent = VisualRefineAgent('novice.png', config, '', simple_instruction)
@@ -71,49 +46,6 @@ def mainworkflow(expert_instruction, simple_instruction, workspace, max_try=3):
         action_agent = PlotAgent(config, final_instruction)
         novice_log, novice_code = action_agent.run_vis(args.model_type, 'novice_final.png')
         logging.info(novice_log)
-
-    # GPT-3.5-turbo Plot Agent
-    # Initial plotting
-    '''action_agent = PlotAgent(config, expanded_simple_instruction)
-    logging.info('=========Novice 3.5 Plotting=========')
-    novice_35_log, novice_35_code = action_agent.run_initial('gpt-3.5-turbo', 'novice_35.png')
-    logging.info(novice_35_log)
-    logging.info('=========Original Code=========')
-    logging.info(novice_35_code)
-    # Code refinement
-    # code_refine_agent = CodeRefineAgent(expanded_simple_instruction, novice_35_code)
-    # refined_response = code_refine_agent.run()
-    # logging.info('=========Refined Code=========')
-    # logging.info(refined_response)
-    # Visual refinement
-    if True:
-        # refined_code = get_code(refined_response)
-        # if refined_code == '':
-        #     refined_code = refined_response.strip('"""')
-        # else:
-        #     pass
-        refined_code = 'print(json.load())'
-        if check_refined_code_executable(refined_code, 'gpt-3.5-turbo', 'novice', config['workspace']):
-            print('Use refined code for visual feedback')
-            visual_refine_agent = VisualRefineAgent('novice_35.png', config, refined_code, simple_instruction)
-            visual_feedback = visual_refine_agent.run('gpt-3.5-turbo', 'novice', 'novice_35_final.png')
-            logging.info('=========Visual Feedback=========')
-            logging.info(visual_feedback)
-            final_instruction = refined_code + '\n\n' + visual_feedback
-            action_agent = PlotAgent(config, final_instruction)
-            novice_35_log, novice_35_code = action_agent.run_vis('gpt-3.5-turbo', 'novice_35_final.png')
-            logging.info(novice_35_log)
-        else:
-            print('Use original code for visual feedback')
-            visual_refine_agent = VisualRefineAgent('novice_35.png', config, '', simple_instruction)
-            visual_feedback = visual_refine_agent.run('gpt-3.5-turbo', 'novice', 'novice_35_final.png')
-            logging.info('=========Visual Feedback=========')
-            logging.info(visual_feedback)
-            final_instruction = '' + '\n\n' + visual_feedback
-            action_agent = PlotAgent(config, final_instruction)
-            novice_35_log, novice_35_code = action_agent.run_vis('gpt-3.5-turbo', 'novice_35_final.png')
-            logging.info(novice_35_log)'''
-
 
 def check_refined_code_executable(refined_code, model_type, query_type, workspace):
     file_name = f'code_action_{model_type}_{query_type}_refined.py'

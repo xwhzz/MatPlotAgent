@@ -24,10 +24,14 @@ MODEL_CONFIG ={
         "temperature": 0,
         "port" : 8005,
     },
-    "CodeLlama-34b-Instruct-hf":{
-        "model": "path/to/CodeLlama-34b-Instruct-hf",
+    "codellama":{
+        "model": "/data/xwh/CodeLlama-13b-Instruct-hf",
         "temperature": 0,
         "port" : 8006,
     },
-
+    "llava": {
+        "model": "/data/xwh/llava-1.5-13b-hf",
+        "temperature": 0,
+        "port": 8000
+    }
 }

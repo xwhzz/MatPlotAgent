@@ -1,5 +1,5 @@
 from .prompt import SYSTEM_PROMPT, EXPERT_USER_PROMPT
-from agents.openai_chatComplete import completion_with_backoff, completion_with_log
+from agents.openai_chatComplete import completion_with_backoff, completion_with_log, completion_with_log_async
 from agents.utils import fill_in_placeholders, get_error_message, is_run_code_success, print_chat_message
 
 
@@ -26,3 +26,20 @@ class QueryExpansionAgent():
         expanded_query_instruction = completion_with_log(messages, self.model_type)
 
         return expanded_query_instruction
+    
+    async def run_async(self, query_type):
+        if query_type == 'expert':
+            information = {
+                'query': self.expert_ins,
+            }
+        else:
+            information = {
+                'query': self.simple_ins,
+            }
+
+        messages = []
+        messages.append({"role": "system", "content": fill_in_placeholders(SYSTEM_PROMPT, information)})
+        messages.append({"role": "user", "content": fill_in_placeholders(EXPERT_USER_PROMPT, information)})
+        expanded_query_instruction = await completion_with_log_async(messages, self.model_type)
+
+        return expanded_query_instruction       
