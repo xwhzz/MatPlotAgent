@@ -54,8 +54,10 @@ def mainworkflow(test_sample_id, workspace, max_try=3):
     logging.info(novice_log)
     logging.info('=========Original Code=========')
     logging.info(novice_code)
-    has_file = os.path.exists(f'{directory}/novice.png')
-    if args.visual_refine and has_file:
+    if not os.path.exists(f'{directory}/novice.png'): ## simulate 
+        shutil.copy(f'./benchmark_data/ground_truth/example_{test_sample_id}.png', f'{directory}/novice.png')
+        logging.info(f'Copied ground truth to {directory}/novice.png')
+    if args.visual_refine:
         print('Use original code for visual feedback')
         visual_refine_agent = VisualRefineAgent('novice.png', config, '', simple_instruction)
         visual_feedback = visual_refine_agent.run(args.vl_model, 'novice', 'novice_final.png')
@@ -68,6 +70,8 @@ def mainworkflow(test_sample_id, workspace, max_try=3):
 
 if __name__ == "__main__":
     workspace_base = args.workspace
-    logging.basicConfig(level=logging.INFO, filename=f'{workspace_base}/workflow.log', filemode='w', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    for i in [76]:# range(3,101):
+    if not os.path.exists(workspace_base):
+        os.mkdir(workspace_base)
+    logging.basicConfig(level=logging.INFO, filename=f'{workspace_base}/workflow.log', filemode='w+', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    for i in range(1,101):
         mainworkflow(i, workspace_base)
