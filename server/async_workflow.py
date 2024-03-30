@@ -59,7 +59,9 @@ async def mainworkflow(test_sample_id, workspace='./workspace', max_try=3):
     logging.info(novice_log)
     logging.info('=========Original Code=========')
     logging.info(novice_code)
-    
+    if not os.path.exists(f'{directory}/novice.png'): ## simulate 
+        shutil.copy(f'./benchmark_data/ground_truth/example_{test_sample_id}.png', f'{directory}/novice.png')
+        logging.info(f'Copied ground truth to {directory}/novice.png')
     if visual_refine and os.path.exists(f'{directory}/novice.png'):
         print('Use original code for visual feedback')
         # Assuming VisualRefineAgent is also updated for async

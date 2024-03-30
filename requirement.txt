@@ -12,3 +12,6 @@ ternary
 scikit-learn
 holoviews
 vllm
+plotly
+holoviews
+scipy

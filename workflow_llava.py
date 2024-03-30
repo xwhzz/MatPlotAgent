@@ -1,8 +1,9 @@
+"""
+VL Model: Llava
+Language Model: Codellama
+"""
 import argparse
 import json
-import re
-
-from tqdm import tqdm
 from agents.query_expansion_agent import QueryExpansionAgent
 from agents.plot_agent import PlotAgent
 from agents.visual_refine_agent import VisualRefineAgent
@@ -10,6 +11,7 @@ import logging
 import os
 import shutil
 import glob
+import time
 parser = argparse.ArgumentParser()
 parser.add_argument('--workspace', type=str, default='./workspace')
 parser.add_argument('--model_type', type=str, default= 'codellama')# 'gpt-3.5-turbo')
@@ -25,6 +27,8 @@ def mainworkflow(test_sample_id, workspace, max_try=3):
         print(f"Directory '{directory}' created successfully.")
     else:
         print(f"Directory '{directory}' already exists.")
+        for file in os.listdir(directory):
+            os.remove(os.path.join(directory, file))
     logging.info('=========Query Expansion AGENT=========')
     config = {'workspace': directory}
 
@@ -74,4 +78,9 @@ if __name__ == "__main__":
         os.mkdir(workspace_base)
     logging.basicConfig(level=logging.INFO, filename=f'{workspace_base}/workflow.log', filemode='w+', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     for i in range(1,101):
-        mainworkflow(i, workspace_base)
+        cur_time = []
+        for _ in range(3):
+            st = time.time()
+            mainworkflow(i, workspace_base)
+            cur_time.append(time.time()-st)
+        logging.info(f"Time taken for sample {i}: {cur_time}, average: {sum(cur_time)/3}")
