@@ -140,9 +140,8 @@ def completion_for_4v(messages, model_type):
                 model=model_full_path,
                 messages=messages,
                 temperature=temperature,
-                max_tokens=1000 
+                max_tokens=1000
             )
-            print(response)
             result = response.choices[0].message
             answer = result.content
             return answer
@@ -185,7 +184,7 @@ async def completion_for_4v_async(messages, model_type):
                 model=model_full_path,
                 messages=messages,
                 temperature=temperature,
-                max_tokens=1000
+                max_tokens=1576
             )
             result = response.choices[0].message
             answer = result.content

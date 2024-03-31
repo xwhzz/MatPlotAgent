@@ -12,6 +12,8 @@ import os
 import shutil
 import glob
 import time
+import numpy as np
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--workspace', type=str, default='./workspace')
 parser.add_argument('--model_type', type=str, default= 'codellama')# 'gpt-3.5-turbo')
@@ -19,9 +21,9 @@ parser.add_argument('--visual_refine', type=bool, default=True)
 parser.add_argument('--vl_model',type=str,default='llava')#'gpt-4v-preview')
 args = parser.parse_args()
 
-def mainworkflow(test_sample_id, workspace, max_try=3):
+def mainworkflow(test_sample_id, workspace, max_try=3, cur_time=0):
     # Query expanding
-    directory = f'{workspace}/example_{test_sample_id}'
+    directory = f'{workspace}/example_{test_sample_id}_{cur_time}'
     if not os.path.exists(directory):
         os.mkdir(directory)
         print(f"Directory '{directory}' created successfully.")
@@ -77,10 +79,30 @@ if __name__ == "__main__":
     if not os.path.exists(workspace_base):
         os.mkdir(workspace_base)
     logging.basicConfig(level=logging.INFO, filename=f'{workspace_base}/workflow.log', filemode='w+', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    for i in range(1,101):
-        cur_time = []
-        for _ in range(3):
-            st = time.time()
-            mainworkflow(i, workspace_base)
-            cur_time.append(time.time()-st)
-        logging.info(f"Time taken for sample {i}: {cur_time}, average: {sum(cur_time)/3}")
+    id_list = list(range(1,101))
+    while id_list:
+        remove_id = []
+        for i in id_list:
+            ## max try time: 3
+            for _ in range(3): 
+                cur_time = []
+                for ii in range(3):
+                    st = time.time()
+                    mainworkflow(i, workspace_base,3, ii)
+                    cur_time.append(time.time()-st)
+                result = np.array(cur_time)
+                mean = np.mean(result)
+                std_dev = np.std(result)
+                cv = std_dev / mean if mean else 0
+                logging.info(f"Fail Time taken for sample {i}: {cur_time}, average: {mean}, cv: {cv}")
+                if cv < 0.01:
+                    break
+            else:
+                continue
+            logging.info(f"Time taken for sample {i}: {cur_time}, average: {mean}, cv: {cv}")
+            remove_id.append(i)
+        if remove_id:
+            for i in remove_id:
+                id_list.remove(i)
+    
+    logging.info("Over!")
