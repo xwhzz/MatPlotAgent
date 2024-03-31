@@ -40,6 +40,6 @@ class QueryExpansionAgent():
         messages = []
         messages.append({"role": "system", "content": fill_in_placeholders(SYSTEM_PROMPT, information)})
         messages.append({"role": "user", "content": fill_in_placeholders(EXPERT_USER_PROMPT, information)})
-        expanded_query_instruction = await completion_with_log_async(messages, self.model_type)
+        expanded_query_instruction, token_length = await completion_with_log_async(messages, self.model_type)
 
-        return expanded_query_instruction       
+        return expanded_query_instruction, token_length      

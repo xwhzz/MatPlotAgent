@@ -151,7 +151,9 @@ class PlotAgent():
     async def run_async(self, query, model_type, query_type, file_name):
         try_count = 0
         image_file = file_name
-        result = await self.generate_async(query, model_type=model_type, query_type=query_type, file_name=file_name)
+        ll = 0
+        result, token_length = await self.generate_async(query, model_type=model_type, query_type=query_type, file_name=file_name)
+        ll += token_length
         while try_count < 4:           
             if not isinstance(result, str):  # 如果返回的不是字符串，那么就是出错了
                 return 'TOO LONG FOR MODEL', code
@@ -180,11 +182,11 @@ class PlotAgent():
                                                                                           {'error_message': f'No plot generated. When you complete a plot, remember to save it to a png file. The file name should be """{image_file}""".',
                                                                                            'data_information': self.data_information})})
                     try_count += 1
-                    result = await completion_with_backoff_async(self.chat_history, model_type=model_type)
-
+                    result, token_length = await completion_with_backoff_async(self.chat_history, model_type=model_type)
+                    ll += token_length
 
                 else:
-                    return log, code
+                    return log, code, ll
 
             else:
                 error = get_error_message(log) if error is None else error
@@ -193,10 +195,11 @@ class PlotAgent():
                                                                                           {'error_message': error,
                                                                                            'data_information': self.data_information})})
                 try_count += 1
-                result = await completion_with_backoff_async(self.chat_history, model_type=model_type)
-                print(result)
+                result, token_length = await completion_with_backoff_async(self.chat_history, model_type=model_type)
+                ll += token_length
+                # print(result)
 
-        return log, ''
+        return log, '', ll
 
 
     def run_initial(self, model_type, file_name):
@@ -208,8 +211,8 @@ class PlotAgent():
     async def run_initial_async(self, model_type, file_name):
         print('========Plot AGENT Expert RUN========')
         self.chat_history = []
-        log, code = await self.run_async(self.query, model_type, 'initial', file_name)
-        return log, code
+        log, code, ll = await self.run_async(self.query, model_type, 'initial', file_name)
+        return log, code, ll
 
     def run_vis(self, model_type, file_name):
         print('========Plot AGENT Novice RUN========')
@@ -220,8 +223,8 @@ class PlotAgent():
     async def run_vis_async(self, model_type, file_name):
         print('========Plot AGENT Novice RUN========')
         self.chat_history = []
-        log, code = await self.run_async(self.query, model_type, 'vis_refined', file_name)
-        return log, code
+        log, code, ll = await self.run_async(self.query, model_type, 'vis_refined', file_name)
+        return log, code, ll
 
     def run_one_time(self, model_type, file_name,query_type='novice',no_sysprompt=False):
         

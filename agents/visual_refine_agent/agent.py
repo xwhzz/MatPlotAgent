@@ -87,7 +87,10 @@ class VisualRefineAgent:
         messages = []
         messages.append({"role": "system", "content": fill_in_placeholders(SYSTEM_PROMPT, information)})
         messages.append({"role": "user",
-                        "content": [fill_in_placeholders(USER_PROMPT, information),
+                        "content": [{
+                                    "type": "text",
+                                    "text": fill_in_placeholders(USER_PROMPT, information),
+                                    },
                                     {
                                     "type": "image_url",
                                     "image_url": {
@@ -96,6 +99,6 @@ class VisualRefineAgent:
                                     },
                                     ]
                         })
-        visual_feedback = await completion_for_4v_async(messages, model_type)
+        visual_feedback,ll = await completion_for_4v_async(messages, model_type)
 
-        return visual_feedback
+        return visual_feedback,ll
